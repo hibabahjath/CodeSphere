@@ -63,7 +63,7 @@ class WishList(BaseModel):
 
 class WishListItem(BaseModel):
 
-    wishlist_object=models.ForeignKey(WishList,on_delete=models.CASCADE,related_name="basket-item")
+    wishlist_object=models.ForeignKey(WishList,on_delete=models.CASCADE,related_name="basket_item")
 
     project_object=models.ForeignKey(Project,on_delete=models.CASCADE)
 

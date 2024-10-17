@@ -15,13 +15,14 @@ class BaseModel(models.Model):
 
 # UserProfile.objects.filter(owner=request.user)
 # request.user.profile.profile_picture
+
 class UserProfile(BaseModel):
 
-    bio=models.CharField(max_length=200)
+    bio=models.CharField(max_length=200,null=True)
 
     profile_picture=models.ImageField(upload_to="profilepictures",null=True,blank=True)
 
-    phone=models.CharField(max_length=200)
+    phone=models.CharField(max_length=200,null=True)
 
     owner=models.OneToOneField(User,on_delete=models.CASCADE,related_name="profile")
 

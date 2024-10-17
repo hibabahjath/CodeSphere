@@ -78,6 +78,23 @@ class Order(BaseModel):
 
     order_id=models.CharField(max_length=200,null=True)
 
+from django.db.models.signals import post_save
+
+def create_user_profile(sender,instance,created,**kwargs):
+
+    if created:
+
+        UserProfile.objects.create(owner=instance)
+
+post_save.connect(create_user_profile,User)
+
+def create_user_wishlist(sender,instance,created,**kwargs):
+
+    if created:
+
+        WishList.objects.create(owner=instance)
+
+post_save.connect(create_user_wishlist,User)
     
 
 

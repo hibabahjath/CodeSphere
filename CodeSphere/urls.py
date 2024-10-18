@@ -20,5 +20,10 @@ from store import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/',views.SignUpView.as_view(),name="signup")
+    path('register/',views.SignUpView.as_view(),name="signup"),
+    path('login/',views.SignInView.as_view(),name="signin"),
+    path('index/',views.IndexView.as_view(),name="index"),
+    path('logout/',views.LogoutView.as_view(),name="logout"),
+
+
 ]

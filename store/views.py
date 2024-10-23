@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 
-from store.forms import SignUp,SignIn
+from store.forms import SignUp,SignIn,UserProfileForm,ProjectForm
 
 from django.urls import reverse_lazy
 
@@ -94,3 +94,58 @@ class LogoutView(View):
 #     logout(request)
 
 #     return redirect("signin")
+
+class UserProfileEditView(View):
+
+    template_name="profile-edit.html"
+
+    form_class=UserProfileForm
+
+    def get(self,request,*args,**kwargs):
+
+        profile_user_instance=request.user.profile
+
+        form_instance=UserProfileForm(instance=profile_user_instance)
+
+        return render(request,self.template_name,{"form":form_instance})
+    
+    def post(self,request,*args,**kwargs):
+
+        user_profile_instance=request.user.profile
+
+        form_instance=self.form_class(request.POST,instance=user_profile_instance,files=request.FILES)
+
+        if form_instance.is_valid():
+
+            form_instance.save()
+
+            return redirect("index")
+        
+        return render(request,self.template_name,{"form":form_instance})
+    
+class ProjectCreateView(View):
+
+    template_name="project_add.html"
+
+    form_class=ProjectForm
+
+    def get(self,request,*args,**kwargs):
+
+        form_instance=self.form_class()
+
+        return render(request,self.template_name,{"form":form_instance})
+    
+    def post(self,request,*args,**kwargs):
+
+        form_instance=self.form_class(request.POST,files=request.FILES)
+
+        form_instance.instance.developer=request.user
+
+        if form_instance.is_valid():
+
+            form_instance.save()
+
+            return redirect("index")
+        
+        return render(request,self.template_name,{"form":form_instance})
+

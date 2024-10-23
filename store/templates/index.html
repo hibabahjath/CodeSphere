@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h2>Welcome {{request.user}}</h2>
-    <a href="{% url 'logout' %}">Logout</a>
-</body>
-</html>
+{%extends 'base.html'%}
+
+{%block main_block%}
+
+<h1>Welcome</h1>
+
+{%endblock%}

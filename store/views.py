@@ -10,6 +10,8 @@ from django.views.generic import View,FormView,CreateView,TemplateView
 
 from django.contrib import messages
 
+from store.models import Project
+
 # Create your views here.
 
 # class SignUpView(View):
@@ -76,9 +78,15 @@ class SignInView(FormView):
         
         return render(request,self.template_name,{"form":form_instance})
 
-class IndexView(TemplateView):
+class IndexView(View):
 
     template_name="index.html"
+
+    def get(self,request,*args,**kwargs):
+
+        qs=Project.objects.all().exclude(developer=request.user)
+
+        return render(request,self.template_name,{"data":qs})
 
 class LogoutView(View):
 
@@ -148,4 +156,62 @@ class ProjectCreateView(View):
             return redirect("index")
         
         return render(request,self.template_name,{"form":form_instance})
+
+class MyProjectListView(View):
+
+    template_name="my_projects.html"
+
+    def get(self,request,*args,**kwargs):
+
+        qs=Project.objects.filter(developer=request.user)
+
+        return render(request,self.template_name,{"data":qs})
+    
+class ProjectUpdateView(View):
+
+    template_name="project_update.html"
+
+    form_class=ProjectForm
+
+    def get(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+
+        project_objects=Project.objects.get(id=id)
+
+        form_instance=self.form_class(instance=project_objects)
+
+        return render(request,self.template_name,{"form":form_instance})
+    
+    def post(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+
+        project_objects=Project.objects.get(id=id)
+
+        form_instance=self.form_class(request.POST,instance=project_objects,files=request.FILES)
+
+        if form_instance.is_valid():
+
+            form_instance.save()
+
+            return redirect("my-project")
+        
+        return render(request,self.template_name,{"form":form_instance})
+    
+class ProjectDetailView(View):
+
+    template_name="project-detail.html"
+
+    def get(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+
+        qs=Project.objects.get(id=id)
+
+        return render(request,self.template_name,{"data":qs})
+    
+    
+
+
 

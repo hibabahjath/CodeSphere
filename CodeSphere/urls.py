@@ -28,6 +28,9 @@ urlpatterns = [
     path('logout/',views.LogoutView.as_view(),name="logout"),
     path('profile/edit/',views.UserProfileEditView.as_view(),name="profile-edit"),
     path('project/add/',views.ProjectCreateView.as_view(),name="project-add"),
+    path('myworks/all/',views.MyProjectListView.as_view(),name="my-project"),
+    path('project/<int:pk>/update/',views.ProjectUpdateView.as_view(),name="project-update"),
+    path('project/<int:pk>/detail/',views.ProjectDetailView.as_view(),name="project-detail"),
 
 
 

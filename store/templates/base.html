@@ -42,7 +42,7 @@
                   </li>
       
                   <li>
-                    <a class="text-gray-500 transition hover:text-gray-500/75" href="#"> Services </a>
+                    <a class="text-gray-500 transition hover:text-gray-500/75" href="{%url 'my-wishlist'%}"> WishList </a>
                   </li>
       
                   <li>
@@ -148,6 +148,15 @@
       </header>
 
     <!-- navbar ends -->
+
+    {%if messages%}
+        {%for m in messages%}
+
+            {{m}}
+
+        {%endfor%}
+
+    {%endif%}
 
     {%block main_block%}
 

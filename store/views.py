@@ -1,6 +1,8 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 
 from store.forms import SignUp,SignIn,UserProfileForm,ProjectForm
+
+from django.contrib import messages
 
 from django.urls import reverse_lazy
 
@@ -208,6 +210,36 @@ class ProjectDetailView(View):
         id=kwargs.get("pk")
 
         qs=Project.objects.get(id=id)
+
+        return render(request,self.template_name,{"data":qs})
+    
+class AddtoWishListView(View):
+
+    def get(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+
+        project_object=get_object_or_404(Project,id=id)
+
+        try:
+
+            request.user.basket.basket_item.create(project_object=project_object)
+
+            messages.succes(request,"Added to WishList")
+        
+        except Exception as e:
+
+            messages.error(request,"Already Added")
+
+        return redirect("index")
+
+class MyWishListView(View):
+
+    template_name="my_wishlist.html"
+
+    def get(self,request,*args,**kwargs):
+
+        qs=request.user.basket.basket_item.filter(is_order_placed=False)
 
         return render(request,self.template_name,{"data":qs})
     

@@ -31,6 +31,8 @@ urlpatterns = [
     path('myworks/all/',views.MyProjectListView.as_view(),name="my-project"),
     path('project/<int:pk>/update/',views.ProjectUpdateView.as_view(),name="project-update"),
     path('project/<int:pk>/detail/',views.ProjectDetailView.as_view(),name="project-detail"),
+    path('project/<int:pk>/add-to-wishlist/',views.AddtoWishListView.as_view(),name="add-to-wishlist"),
+    path('wishlist/all/',views.MyWishListView.as_view(),name="my-wishlist"),
 
 
 

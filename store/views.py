@@ -16,6 +16,8 @@ from django.views.generic import View,FormView,CreateView,TemplateView
 
 from django.contrib import messages
 
+from decouple import config
+
 from store.models import Project,WishListItem,Order
 
 from django.views.decorators.csrf import csrf_exempt
@@ -286,9 +288,9 @@ class CheckOutView(View):
     def get(self,request,*args,**kwargs):
 
         # razorpay authentication
-        KEY_ID="rzp_test_jCNVUwGtZ6jDcp"
+        KEY_ID= config('KEY_ID')
 
-        KEY_SECRET="Vo8EfXf8ejqqKQu3BxfwojaX"
+        KEY_SECRET= config('KEY_SECRET')
 
         # authenticate
         client=razorpay.Client(auth=(KEY_ID,KEY_SECRET))
@@ -323,9 +325,9 @@ class PaymentVerification(View):
 
         print(request.POST)
 
-        KEY_ID="rzp_test_jCNVUwGtZ6jDcp"
+        KEY_ID= config('KEY_ID')
 
-        KEY_SECRET="Vo8EfXf8ejqqKQu3BxfwojaX"
+        KEY_SECRET= config('KEY_SECRET')
 
         client = razorpay.Client(auth=(KEY_ID,KEY_SECRET))
 

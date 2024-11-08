@@ -1,8 +1,12 @@
 from django.shortcuts import render,redirect,get_object_or_404
 
-from store.forms import SignUp,SignIn,UserProfileForm,ProjectForm
+from store.forms import SignUp,SignIn,UserProfileForm,ProjectForm,PasswordResetForm
 
 from django.contrib import messages
+
+from django.db.models import Sum
+
+from django.contrib.auth.models import User
 
 from django.urls import reverse_lazy
 
@@ -12,7 +16,13 @@ from django.views.generic import View,FormView,CreateView,TemplateView
 
 from django.contrib import messages
 
-from store.models import Project
+from store.models import Project,WishListItem,Order
+
+from django.views.decorators.csrf import csrf_exempt
+
+from django.utils.decorators import method_decorator
+
+from django.core.mail import send_mail
 
 # Create your views here.
 
@@ -45,6 +55,16 @@ from store.models import Project
 #             messages.error("Failed to Create Account")
 
 #             return render(request,self.template_name,{"form":form_instance})
+
+def send_email():
+
+    send_mail(
+    "codehub project download",
+    "you have completed purchase of project",
+    "bahjath107@gmail.com",
+    ["sr4sarath18@gmail.com"],
+    fail_silently=False,
+)
 
 class SignUpView(CreateView):
 
@@ -241,7 +261,158 @@ class MyWishListView(View):
 
         qs=request.user.basket.basket_item.filter(is_order_placed=False)
 
+        total=qs.values("project_object").aggregate(total=Sum("project_object__price")).get("total")
+
+        print("tottal",total)
+
+        return render(request,self.template_name,{"data":qs,"total":total})
+    
+class WishListItemDeleteView(View):
+
+    def get(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+
+        WishListItem.objects.get(id=id).delete()
+
+        return redirect("my-wishlist")
+
+import razorpay
+
+class CheckOutView(View):
+
+    template_name="checkout.html"
+
+    def get(self,request,*args,**kwargs):
+
+        # razorpay authentication
+        KEY_ID="rzp_test_jCNVUwGtZ6jDcp"
+
+        KEY_SECRET="Vo8EfXf8ejqqKQu3BxfwojaX"
+
+        # authenticate
+        client=razorpay.Client(auth=(KEY_ID,KEY_SECRET))
+
+        # amount total
+        amount=request.user.basket.basket_item.filter(is_order_placed=False).values("project_object").aggregate(total=Sum("project_object__price")).get("total")
+
+        data = { "amount": amount*100, "currency": "INR", "receipt": "order_rcptid_codesphere" }
+
+        payment = client.order.create(data=data)
+
+        order_id=payment.get("id")
+
+        order_object=Order.objects.create(order_id=order_id,customer=request.user)
+
+        wishlist_items=request.user.basket.basket_item.filter(is_order_placed=False)
+
+        for wi in wishlist_items:
+
+            order_object.wishlist_item_objects.add(wi)
+
+            wi.is_order_placed=True
+
+            wi.save()
+
+        return render(request,self.template_name,{"key_id":KEY_ID,"amount":amount,"order_id":order_id})
+
+@method_decorator(csrf_exempt,name="dispatch")
+class PaymentVerification(View):
+
+    def post(self,request,*args,**kwargs):
+
+        print(request.POST)
+
+        KEY_ID="rzp_test_jCNVUwGtZ6jDcp"
+
+        KEY_SECRET="Vo8EfXf8ejqqKQu3BxfwojaX"
+
+        client = razorpay.Client(auth=(KEY_ID,KEY_SECRET))
+
+        print("rzp authenticated")
+
+        try:
+
+            client.utility.verify_payment_signature(request.POST)
+
+            order_id=request.POST.get("razorpay_order_id")
+
+            print(order_id,"printing","b4 update")
+
+            Order.objects.filter(order_id=order_id).update(is_paid=True)
+
+            print("after update")
+
+            send_email(
+
+            )
+            
+            print("success")
+        
+        except:
+
+
+            print("failed")
+
+        return redirect("orders")
+
+class MyOrdersView(View):
+
+    template_name="myorders.html"
+
+    def get(self,request,*args,**kwargs):
+
+        qs=Order.objects.filter(customer=request.user)
+
         return render(request,self.template_name,{"data":qs})
+    
+class PasswordResetView(View):
+
+    template_name="password_reset.html"
+
+    form_class=PasswordResetForm
+
+    def get(self,request,*args,**kwargs):
+
+        form_instance=self.form_class()
+
+        return render(request,self.template_name,{"form":form_instance})
+    
+    def post(self,request,*args,**kwargs):
+
+        form_instance=self.form_class(request.POST)
+
+        if form_instance.is_valid():
+
+            username=form_instance.cleaned_data.get("username")
+
+            email=form_instance.cleaned_data.get("email")
+
+            password1=form_instance.cleaned_data.get("password1")
+
+            password2=form_instance.cleaned_data.get("password2")
+
+            print(username,email,password1,password2)
+
+            try:
+
+                assert password1==password2,"Password Mismatch"
+
+                user_object=User.objects.get(username=username,email=email)
+
+                user_object.set_password(password2)
+
+                user_object.save()
+
+                return redirect("signin")
+
+            except Exception as e:
+
+                messages.error(request,f"{e}")
+
+        return render(request,self.template_name,{"form":form_instance})
+
+
     
     
 

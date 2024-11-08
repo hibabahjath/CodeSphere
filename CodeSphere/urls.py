@@ -33,7 +33,11 @@ urlpatterns = [
     path('project/<int:pk>/detail/',views.ProjectDetailView.as_view(),name="project-detail"),
     path('project/<int:pk>/add-to-wishlist/',views.AddtoWishListView.as_view(),name="add-to-wishlist"),
     path('wishlist/all/',views.MyWishListView.as_view(),name="my-wishlist"),
-
+    path('wishlist/<int:pk>/delete/',views.WishListItemDeleteView.as_view(),name="delete-item"),
+    path('checkout',views.CheckOutView.as_view(),name="checkout"),
+    path('payment/verify',views.PaymentVerification.as_view(),name="verify-payment"),
+    path('order/all',views.MyOrdersView.as_view(),name="orders"),
+    path('passwordreset/',views.PasswordResetView.as_view()),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
